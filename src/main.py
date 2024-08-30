@@ -17,16 +17,25 @@ import subprocess
 import os
 
 import tkinter as tk
+from tkinter import ttk
+from PIL import Image, ImageTk
 from tkinter import INSERT
 from tkinter import END
 from tkinter import LEFT, RIGHT, BOTTOM
 import threading
+
+from PyQt5 import QtGui
+from PyQt5.QtWidgets import QApplication, QMainWindow, QLabel
+
 from utils import *
 
 
 import collections
 # from queue import LifoQueue
 from pynput import keyboard
+
+import sys
+
 
 var = 0
 queue = []
@@ -65,6 +74,8 @@ def on_press(key):
     #     var = 5
 
 def main():
+
+
     global queue
     global var
     path = r'C:\Users\tiago\play_audio\songs'
@@ -174,54 +185,101 @@ def main():
         global var
         var = 2
     r = tk.Tk()
+    # root.iconify()
+    # r = tk.Toplevel(root)
+    # # r.overrideredirect(1)
+    r.iconbitmap(r"C:\Users\tiago\PycharmProjects\pythonProject1\logo.ico")
     r.title('Audio player')
+    r.geometry("")
+    r.state('zoomed')
+    # r.wm_attributes('-fullscreen','true')
+    # r.wm_attributes('-type', 'splash')
+    # r.wm_deiconify()
+    r.grid_columnconfigure(0, weight=1)
+    r.grid_columnconfigure(1, weight=1)
+    style = ttk.Style()
+    style.configure("RR.TFrame", foreground="black", background="red")
+    mainframe = ttk.Frame(r, )
+    mainframe.grid(column=0, row=0, columnspan=4, rowspan=6, sticky="nsew")
+    mainframe.grid_rowconfigure(0, weight=1)
+    mainframe.grid_rowconfigure(1, weight=1)
+    mainframe.grid_rowconfigure(2, weight=1)
+    mainframe.grid_rowconfigure(3, weight=1)
+    mainframe.grid_rowconfigure(4, weight=1)
+    mainframe.grid_rowconfigure(5, weight=1)
+    mainframe.grid_columnconfigure(0, weight=1)
+    mainframe.grid_columnconfigure(1, weight=1)
+    mainframe.grid_columnconfigure(2, weight=1)
+    mainframe.grid_columnconfigure(3, weight=1)
+    
+    # Create a photoimage object of the image in the path
+    # image1 = Image.open("C:/Users/tiago/Akin_as_art_final.png")
+    # test = ImageTk.PhotoImage(image1)
+    # label1 = tk.Label(image=test)
+    # label1.image = test
+    # label1.pack()
+    # Position image
 
-    buttons = tk.Frame(r)
-    button = tk.Button(buttons, text='pause/play', width=10, command=pause)
+    buttons = ttk.Frame(mainframe)
+    button = ttk.Button(buttons, text='pause/play', width=10, command=pause)
 
-    buttonRewind = tk.Button(buttons, text='rewind 10', width=10, command=rewind)
+    buttonRewind = ttk.Button(buttons, text='rewind 10', width=10, command=rewind)
 
-    buttonForward = tk.Button(buttons, text='forward 10', width=10, command=forward)
+    buttonForward = ttk.Button(buttons, text='forward 10', width=10, command=forward)
 
-    buttonPrev = tk.Button(buttons, text="prev", width=10, command=prev)
+    buttonPrev = ttk.Button(buttons, text="prev", width=10, command=prev)
 
-    buttonNext = tk.Button(buttons, text="next", width=10, command=next_song)
+    buttonNext = ttk.Button(buttons, text="next", width=10, command=next_song)
 
-    buttonPrev.pack(side=LEFT)
-    buttonRewind.pack(side=LEFT)
-    button.pack(side=LEFT)
-    buttonForward.pack(side=LEFT)
-    buttonNext.pack(side=LEFT)
+    buttonPrev.grid(column=0, row=0)
+    buttonRewind.grid(column=1, row=0)
+    button.grid(column=2, row=0)
+    buttonForward.grid(column=3, row=0)
+    buttonNext.grid(column=4, row=0)
 
-    # entry = tk.Entry(r, width=25)
+    # entry = tk.Entry(mainframe, width=25)
     # entry.pack()
-    listbox = tk.Listbox(r, width=100, activestyle='none')
+    # Songs
+    style = ttk.Style()
+    style.configure("BW.TFrame", foreground="black", background="white")
+    song_frame = ttk.Frame(mainframe, style="BW.TFrame")
+    album_frame = ttk.Frame(mainframe, style="BW.TFrame")
+    song_frame.grid(column=0, row=0, columnspan=2, sticky="nsew", padx=5)
+    album_frame.grid(column=2, row=0, columnspan=2, sticky="nsew", padx=5)
+    song_frame.grid_rowconfigure(0, weight=1)
+    song_frame.grid_columnconfigure(0, weight=1)
+    album_frame.grid_rowconfigure(0, weight=1)
+    album_frame.grid_columnconfigure(2, weight=1)
+    #width=100, activestyle='none'
+    songList = ttk.Treeview(song_frame, height=25, show="tree")
     for f in fileList:
-        listbox.insert(END, f + '\n')
-    listbox.pack()
+        songList.insert("", END, text=f)
+    songList.grid(column=0, row=0, columnspan=2, sticky="nsew")
 
 
-    # scale = tk.Scale(r, width=25, from_=0,to_=100, command=slide)
+    # scale = tk.Scale(mainframe, width=25, from_=0,to_=100, command=slide)
     # scale.pack()
-    playlist = DragDropListbox(r, queue, height=30, width=100, activestyle='none')
+    playlist = DragDropListbox(mainframe, queue, height=30, width=100, activestyle='none')
     def enter():
-        for index in listbox.curselection():
-            playlist.insert(END, fileList[index] + '\n')
+        for index in songList.selection():
+            id = index[1:]
+            id = int(id, 16) - 1
+            playlist.insert(END, fileList[id] + '\n')
             # if queue is None:
             #     queue = Node(fileList[index])
             # else:
             #     queue.setNext(Node(fileList[index]))
             #     queue.getNext().setPrev(queue)
-            queue.append(fileList[index])
+            queue.append(fileList[id])
 
-    buttonEnter = tk.Button(r, text='enter', width=25, command=enter)
-    buttonEnter.pack()
+    buttonEnterSongs = ttk.Button(song_frame, text='enter', width=25, command=enter)
+    buttonEnterSongs.grid(column=0, row=1, columnspan=2)
 
-    # albumList = tk.Listbox(r, width=100)
-    albumList = tk.Listbox(r, width=100, activestyle='none')
+    # albumList = tk.Listbox(mainframe, width=100)
+    albumList = ttk.Treeview(album_frame, height=25, show="tree")
     for album in albums:
-        albumList.insert(END, album.name + '\n')
-    albumList.pack()
+        albumList.insert("", END, text=album.name)
+    albumList.grid(column=2, row=0, columnspan=2, sticky="nsew")
     def go(event):
         print("hey")
 
@@ -234,21 +292,26 @@ def main():
 
     # albumList.pack()
     #
-    # bro = ReorderableListbox(tk.Listbox(r, width=100))
+    # bro = ReorderableListbox(tk.Listbox(mainframe, width=100))
     # bro.pack()
 
     def enter2():
         global queue
-        for index in albumList.curselection():
+        for index in albumList.selection():
+            index = index[1:]
+            index = int(index, 16) - 1
             for song in albums[index].songs:
                 playlist.insert(END, song + '\n')
-            queue.extend(albums[index].songs)
-    buttonEnter2 = tk.Button(r, text='enter', width=25, command=enter2)
-    buttonEnter2.pack()
+                queue.append(albums[index].name + '\\' + song)
+            # queue.extend(albums[index].songs)
+    buttonEnter2 = ttk.Button(album_frame, text='enter', width=25, command=enter2)
+    buttonEnter2.grid(column=2, row=1, columnspan=2)
 
-    now_playing = tk.Label(r, text='', height=1, width=40, anchor="w")
-    now_playing.pack()
-    scale = tk.Scale(r, length=100, from_=0, to=200, orient='horizontal', showvalue=0, activebackground='red')
+# height = 1
+    now_playing = ttk.Label(mainframe, text='', width=40, anchor="w")
+    now_playing.grid(column=1, row=2, columnspan=2)
+    # , showvalue=0, activebackground='red'
+    scale = ttk.Scale(mainframe, length=100, from_=0, to=200, orient='horizontal')
     def slide(event):
         global var
         global time
@@ -261,10 +324,10 @@ def main():
         scalePressed = True
     scale.bind("<ButtonRelease-1>", slide)
     scale.bind("<ButtonPress-1>", pressed)
-    buttons.pack()
-    scale.pack()
+    buttons.grid(column=0, row=3, columnspan=4)
+    scale.grid(column=1, row=4, columnspan=2)
 
-    playlist.pack()
+    playlist.grid(column=1, row=5, columnspan=2, sticky="nsew")
 
     def main_loop():
         global var
@@ -279,11 +342,12 @@ def main():
             print('Now playing: ' + name)
             now_playing.config(text=name)
             var = 0
+            full_path = "C:\\Users\\tiago\\play_audio\\songs\\" + name
+            # print(full_path)
             song = subprocess.Popen(
-                ["C:\\Users\\tiago\\Downloads\\ffmpeg-5.0.1-full_build\\bin\\ffmpeg.exe", "-i", "C:\\Users\\tiago\\play_audio\\songs\\" + name, "-loglevel",
+                ["C:\\Users\\tiago\\Downloads\\ffmpeg-5.0.1-full_build\\bin\\ffmpeg.exe", "-i", full_path, "-loglevel",
                  "panic", "-vn", "-f", "s16le", "pipe:1"],
                 stdout=subprocess.PIPE, shell=True)
-            
             data = song.stdout.read(CHUNK)
             curr = Node(data)
             tmp = curr

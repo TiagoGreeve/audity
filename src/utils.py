@@ -81,6 +81,9 @@ class DragDropListbox(Tkinter.Listbox):
         self.bind('<B1-Motion>', self.shiftSelection)
         self.curIndex = None
 
+    # def insert(self, index, *elements):
+    #
+
     def setCurrent(self, event):
         self.curIndex = self.nearest(event.y)
 
