@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 # This is a sample Python script.
 
 # Press Shift+F10 to execute it or replace it with your code.
@@ -27,15 +28,19 @@ import threading
 from PyQt5 import QtGui
 from PyQt5.QtWidgets import QApplication, QMainWindow, QLabel
 
-from utils import *
-
+from files import getSongs, getAlbums
+from utils import DragDropListbox, Node
 
 import collections
 # from queue import LifoQueue
 from pynput import keyboard
 
-import sys
-
+#iconpath = r"D:\gitRepos\tiago\audity\resources\logo.ico"
+iconpath = "/home/tiago/GitRepos/tiago/audity/resources/logo.ico"
+#base_path = "D:\\gitRepos\\tiago\\audity\\resources\\songs\\"
+base_path = "/home/tiago/GitRepos/tiago/audity/resources/songs/"
+#ffmpeg_path = "C:\\Users\\tiago\\Downloads\\ffmpeg-5.0.1-full_build\\bin\\ffmpeg.exe"
+ffmpeg_path = "/usr/bin/ffmpeg"
 
 var = 0
 queue = []
@@ -78,31 +83,14 @@ def main():
 
     global queue
     global var
-    path = r'C:\Users\tiago\play_audio\songs'
-    extensions = ['mp3', 'wav']
-    fileList = get_files_with_ext(path, extensions)
 
-    iter = os.walk("C:\\Users\\tiago\\play_audio\\songs")
-    # for root, dirs, files in iter:
-    #     print(dirs)
-    #     break
-    next(iter)
-    albums = []
-    for root, dirs, files in iter:
-        # print(root)
-        if os.path.samefile(os.path.dirname(root), path):
-            # print(root)
-            albums.append(Album(os.path.basename(root), filter_with_ext(files, extensions)))
-
-    # for album in albums:
-    #     print(album)
+    fileList = getSongs()
+    albums = getAlbums()
 
     listener = keyboard.Listener(on_press=on_press)
     listener.start()  # start to listen on a separate thread
     # listener.join()  # remove if main thread is polling self.keys
-
-
-
+    
 
 
 
@@ -188,11 +176,16 @@ def main():
     # root.iconify()
     # r = tk.Toplevel(root)
     # # r.overrideredirect(1)
-    r.iconbitmap(r"C:\Users\tiago\PycharmProjects\pythonProject1\logo.ico")
+#    r.iconbitmap(iconpath)
     r.title('Audio player')
-    r.geometry("")
-    r.state('zoomed')
-    # r.wm_attributes('-fullscreen','true')
+#    r.geometry("")
+    width= r.winfo_screenwidth()
+    height= r.winfo_screenheight()
+    #setting tkinter window size
+    r.geometry("%dx%d" % (width, height))
+#    r.state('zoomed')
+    r.wm_attributes('-zoomed', True)
+#    r.wm_attributes('-fullscreen','true')
     # r.wm_attributes('-type', 'splash')
     # r.wm_deiconify()
     r.grid_columnconfigure(0, weight=1)
@@ -302,7 +295,8 @@ def main():
             index = int(index, 16) - 1
             for song in albums[index].songs:
                 playlist.insert(END, song + '\n')
-                queue.append(albums[index].name + '\\' + song)
+#                queue.append(albums[index].name + '\\' + song)
+                queue.append(albums[index].name + '/' + song)
             # queue.extend(albums[index].songs)
     buttonEnter2 = ttk.Button(album_frame, text='enter', width=25, command=enter2)
     buttonEnter2.grid(column=2, row=1, columnspan=2)
@@ -342,12 +336,11 @@ def main():
             print('Now playing: ' + name)
             now_playing.config(text=name)
             var = 0
-            full_path = "C:\\Users\\tiago\\play_audio\\songs\\" + name
-            # print(full_path)
+            full_path = base_path + name
             song = subprocess.Popen(
-                ["C:\\Users\\tiago\\Downloads\\ffmpeg-5.0.1-full_build\\bin\\ffmpeg.exe", "-i", full_path, "-loglevel",
+                [ffmpeg_path, "-i", full_path, "-loglevel",
                  "panic", "-vn", "-f", "s16le", "pipe:1"],
-                stdout=subprocess.PIPE, shell=True)
+                stdout=subprocess.PIPE, shell=False)
             data = song.stdout.read(CHUNK)
             curr = Node(data)
             tmp = curr
