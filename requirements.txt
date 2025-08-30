@@ -1,0 +1,5 @@
+pynput
+#pyaudio needed sudo apt install portaudio19-dev
+pyaudio
+pillow
+PyQt5
